@@ -1,0 +1,60 @@
+#include <iostream>
+#include <vector>
+#include <string>
+#include <cmath>
+
+using namespace std;
+
+unsigned long long int Karatsuba_multiplication(unsigned long int x, unsigned long int y)
+{
+	if ((x < 10) || (y < 10))
+	{
+		return x * y;
+	}
+	else
+	{
+
+		unsigned long long int z0, z1, z2;
+		unsigned long int high1, high2, low1, low2, multiplier;
+		unsigned int largest_no_length;
+		string s1, s2;
+
+		s1 = to_string(x);		
+		s2 = to_string(y);
+		largest_no_length = (int)(fmax(s1.length(), s2.length()));
+		largest_no_length = (largest_no_length / 2) + (largest_no_length % 2);
+		multiplier = pow(10, largest_no_length);
+
+		high1 = x / multiplier;
+		low1 = x - (high1 * multiplier);
+		high2 = y / multiplier;
+		low2 = y - (high2 * multiplier);
+
+		
+		z0 = Karatsuba_multiplication(high1, high2);
+		z1 = Karatsuba_multiplication(high1 + low1, high2 + low2);
+		z2 = Karatsuba_multiplication(low1, low2);
+
+		return (z0 * pow(10, (largest_no_length * 2))) + ((z1 - z0 - z2) * multiplier) + z2;
+			
+
+	}
+}
+
+int main()
+{
+	unsigned int i;
+	unsigned long int a, b;
+
+	cout << "Program to add 2 numbers using Karatsuba multiplication \n\n Please enter the first number: " ;
+	cin >> a;
+	cout << "Please enter second number: ";
+	cin >> b;
+	
+	cout << "\n The result is: " << Karatsuba_multiplication(a, b) << "\n\n";
+
+	system("pause");
+
+	return 1;
+    
+}
