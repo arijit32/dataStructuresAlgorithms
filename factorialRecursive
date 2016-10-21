@@ -1,0 +1,23 @@
+#include <iostream>
+
+using namespace std;
+
+unsigned int factorial_recursive(unsigned int n)
+{
+	if (n == 0)
+		return 1;
+	return n * factorial_recursive(n - 1);
+}
+
+int main()
+{
+	unsigned int i;
+	
+	cout << "Please enter a number to calculate factorial" << endl;
+	cin >> i;
+	cout << factorial_recursive(i) << endl;
+	cout << "Enter a key to continue " << endl;
+	cin >> i;
+
+  return 0;
+}
