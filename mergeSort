@@ -1,0 +1,140 @@
+// ConsoleApplication2.cpp : Defines the entry point for the console application.
+// contains all source code
+
+#include <iostream>
+#include <algorithm>
+#include <vector>
+#include <fstream>
+#include <cmath>
+#include <iterator>
+
+using namespace std;
+
+//! \brief Merges two sorted vectors into one sorted vector
+//! \param left A sorted vector of integers
+//! \param right A sorted vector of integers
+//! \return A sorted vector that is the result of merging two sorted
+//! vectors.
+vector<int> merge(vector<int> &vec, const vector<int>& left, const vector<int>& right)
+{
+
+	// Fill the resultant vector with sorted results from both vectors
+	// Entire merge process works in O(n) operations as its basically a scan on n combined elements of the left and right vectors
+	vector<int> result;
+
+	unsigned left_it = 0, right_it = 0;
+
+	while (left_it < left.size() && right_it < right.size())
+	{
+		if (left[left_it] < right[right_it])
+		{
+			result.push_back(left[left_it]);
+			left_it++;
+		}
+		else
+		{
+			result.push_back(right[right_it]);
+			right_it++;
+		}
+	}
+
+	// Push the remaining data from both vectors onto the resultant
+	while (left_it < left.size())
+	{
+		result.push_back(left[left_it]);
+		left_it++;
+	}
+
+	while (right_it < right.size())
+	{
+		result.push_back(right[right_it]);
+		right_it++;
+	}
+
+	vec = result;
+	return vec;
+
+}
+
+vector<int> MergeSort(vector< int> & vec)
+{
+	// Termination condition: List is completely sorted if it
+	// only contains a single element.
+	if (vec.size() == 1)
+	{
+		return vec;
+	}
+
+	// Determine the location of the middle element in the vector
+	vector<int>::iterator middle = vec.begin() + (vec.size() / 2);
+
+	vector<int> left(vec.begin(), middle);
+	vector<int> right(middle, vec.end());
+
+	// Perform a merge sort on the two smaller vectors
+	left = MergeSort(left);
+	right = MergeSort(right);
+
+	//merge left and right vectors into vec
+	return merge(vec, left, right);
+}
+
+int main()
+{
+	unsigned int i, ii;
+	bool swapped;
+	//vector<int> random_integers;
+	//vector<int> random_integers(8);
+
+	cout << "Program to read in file of random numbers and sort using mergesort" << endl;
+	swapped = false;
+	ifstream fpInput("C:/Users/Arijit/Google Drive/DataStrucAndAlgo/Projects/Datasets/Inputs/IntegerArray.txt");
+	if (fpInput.is_open())
+	{
+
+		cout << "Opened input file successfully!" << endl;
+
+		//i = 0;
+		//while (i < 8)
+		//while (fpInput >> random_integers[i])
+		//{
+			//fpInput >> random_integers[i];
+			//++i;
+			//cout << i << endl;
+		//}
+		vector<int> random_integers{ istream_iterator<int>{fpInput},{} };
+
+		fpInput.close();
+
+		//run merge sort algorithm
+		random_integers = MergeSort(random_integers);
+
+		cout << "sorted array\n";
+		//for (i = 0; i < random_integers.size(); i++)
+		//{
+		//	cout << endl << random_integers[i];
+		//}
+		//cout << endl << endl;
+		copy(random_integers.begin(), random_integers.end(), ostream_iterator<int>(cout, "\n"));
+
+		ofstream fpOutput;
+		fpOutput.open("C:/Users/Arijit/Google Drive/DataStrucAndAlgo/Projects/Datasets/Outputs/MergeSortOutput.txt");
+		copy(random_integers.begin(), random_integers.end(), ostream_iterator<int>(fpOutput, "\n"));
+		fpOutput.close();
+
+		system("pause");
+		return 0;
+
+	}
+	else
+	{
+
+		cout << "Unable to open input file " << endl;
+		system("pause");
+
+		return 1;
+
+	}
+
+}
+
