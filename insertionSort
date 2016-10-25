@@ -1,0 +1,73 @@
+// ConsoleApplication2.cpp : Defines the entry point for the console application.
+// contains all source code
+
+#include <iostream>
+#include <algorithm>
+#include <vector>
+#include <fstream>
+#include <cmath>
+#include <iterator>
+#include <cstdlib>
+
+using namespace std;
+
+//program uses insertion sort on input integer list
+//implementation is within main
+
+int main()
+{
+	int i, j, k, swap;
+	//vector<int> random_integers;
+	vector<int> random_integers(200);
+	bool swap_needed;
+
+	cout << "Program to read in file of random numbers and sort using mergesort" << endl;
+	
+	//random_integers = {6, 5, 3, 1, 8, 7, 2, 4};
+	generate(random_integers.begin(), random_integers.end(), rand);
+
+	//run insertion sort loop
+	for (i = 1; i < random_integers.size(); ++i)
+	{
+		j = i - 1;
+		swap = random_integers[i];
+		k = -1;
+		while (j >= 0)
+		{			
+			if (swap < random_integers[j])
+			{
+				// the statement below may be superfluous, as simply j can be tracked using the break statement
+				// this is especially true as for small data sets, all the data will be stored in RAM
+				k = j;
+				random_integers[j + 1] = random_integers[j];
+			}
+			else
+			{
+				break;
+			}
+			--j;
+		}
+		if (k >= 0)
+		{ 
+			random_integers[k] = swap;
+		}
+	}
+
+	cout << "sorted array\n";
+	//for (i = 0; i < random_integers.size(); i++)
+	//{
+	//	cout << endl << random_integers[i];
+	//}
+	//cout << endl << endl;
+	copy(random_integers.begin(), random_integers.end(), ostream_iterator<int>(cout, "\n"));
+
+	//ofstream fpOutput;
+	//fpOutput.open("C:/Users/Arijit/Google Drive/DataStrucAndAlgo/Projects/Datasets/Outputs/MergeSortOutput.txt");
+	//copy(random_integers.begin(), random_integers.end(), ostream_iterator<int>(fpOutput, "\n"));
+	//fpOutput.close();
+
+	system("pause");
+	return 0;
+
+}
+
