@@ -1,0 +1,88 @@
+// template test.
+// contains all source code
+
+#include <iostream>
+#include <algorithm>
+#include <random>
+#include <vector>
+#include <fstream>
+#include <ctime>
+#include <cmath>
+#include <iterator>
+#include <string>
+#include <map>
+#include <queue>
+#include <limits> // for numeric_limits
+#include <set>
+#include <utility> // for pair
+#include <array>  
+
+using namespace std;
+
+
+void depthFirstSearchWithLevels(const vector<vector<tuple<int, int>>>& adjacency_list, const int startNode, int& pathCount, map<int, int>& nodesTraversed, map<int, int>&  pathTraversed)
+{
+
+	if (adjacency_list.size() < 2)
+	{
+		if (adjacency_list.size() < 1)
+		{
+			nodesTraversed[0] = -1;
+		}
+		else
+		{
+			nodesTraversed[0] = 0;
+		}
+	}
+	else
+	{		
+		nodesTraversed[startNode] = ++pathCount;
+		pathTraversed[pathCount] = startNode;
+			
+		for (vector<tuple<int, int>>::const_iterator iTer = adjacency_list[startNode].begin(); iTer != adjacency_list[startNode].end(); ++iTer)	if (nodesTraversed.find(get<0>(*iTer)) == nodesTraversed.end()) depthFirstSearchWithLevels(adjacency_list, get<0>(*iTer), pathCount, nodesTraversed, pathTraversed);
+				
+	}
+
+
+}
+
+
+int main()
+{
+	
+
+	// remember to insert edges both ways for an undirected graph
+	vector<vector<tuple<int, int>>> adjacency_list(6);
+	// 0 = a
+	adjacency_list[0].push_back(make_tuple(1, 7));
+	adjacency_list[0].push_back(make_tuple(2, 14));
+	// 1 = b
+	adjacency_list[1].push_back(make_tuple(0, 7));
+	adjacency_list[1].push_back(make_tuple(3, 15));
+	// 2 = c
+	adjacency_list[2].push_back(make_tuple(0, 10));
+	adjacency_list[2].push_back(make_tuple(3, 11));
+	adjacency_list[2].push_back(make_tuple(4, 11));
+	// 3 = d
+	adjacency_list[3].push_back(make_tuple(1, 15));
+	adjacency_list[3].push_back(make_tuple(2, 11));
+	adjacency_list[3].push_back(make_tuple(4, 11));
+	adjacency_list[3].push_back(make_tuple(5, 11));
+	// 4 = e 
+	adjacency_list[4].push_back(make_tuple(2, 15));
+	adjacency_list[4].push_back(make_tuple(3, 15));
+	adjacency_list[4].push_back(make_tuple(5, 11));
+	// 5 = e 
+	adjacency_list[5].push_back(make_tuple(3, 15));
+	adjacency_list[5].push_back(make_tuple(4, 11));
+
+
+	auto path_count = -1;
+	map<int, int> nodesTraversed, pathTraversed;
+
+	depthFirstSearchWithLevels(adjacency_list, 0, path_count, nodesTraversed, pathTraversed);
+
+
+	return 0;
+}
+
