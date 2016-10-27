@@ -1,0 +1,83 @@
+#include <vector>
+#include <iostream>
+#include <tuple>
+#include <limits>       // std::numeric_limits
+
+using namespace std;
+
+unsigned int bellmanFord(vector<vector<tuple<int, int>>>& adjacency_list, vector< tuple<int, int> >& bellmanFordComputationalVector, unsigned int& negative_cycle)
+{
+	unsigned int i, j;
+	auto iter1 = adjacency_list[0].begin();
+
+	for (i = 0; i < bellmanFordComputationalVector.size() - 1; ++i)
+	{
+		for (j = 1; j < bellmanFordComputationalVector.size(); ++j)
+		{
+			if (adjacency_list[j].size() > 0)
+			{				
+				for (iter1 = adjacency_list[j].begin(); iter1 != adjacency_list[j].end(); ++iter1)
+				{					
+					if (get<1>(bellmanFordComputationalVector[get<0>(*iter1)]) + get<1>(*iter1) < get<1>(bellmanFordComputationalVector[j]))
+					{
+						get<0>(bellmanFordComputationalVector[j]) = get<0>(*iter1);
+						get<1>(bellmanFordComputationalVector[j]) = get<1>(bellmanFordComputationalVector[get<0>(*iter1)]) + get<1>(*iter1);
+					}
+					
+				}
+			}
+		}
+	}
+
+	for (j = 1; j < bellmanFordComputationalVector.size(); ++j)
+	{
+		if (adjacency_list[j].size() > 0)
+		{
+			for (iter1 = adjacency_list[j].begin(); iter1 != adjacency_list[j].end(); ++iter1)
+			{
+				if (get<1>(bellmanFordComputationalVector[get<0>(*iter1)]) != numeric_limits<int>::max())				
+				{
+					if (get<1>(bellmanFordComputationalVector[get<0>(*iter1)]) + get<1>(*iter1) < get<1>(bellmanFordComputationalVector[j]))
+					{
+						negative_cycle = 1;
+					}
+				}
+			}
+		}
+	}
+
+	return 0;
+}
+
+int main()
+{
+	int noOfGraphElements = 5;
+	unsigned int negative_cycle = 0, i;
+	tuple<int, int> mytuple(NULL, 0);
+	vector< tuple<int, int> > bellmanFordComputationalVector;
+	
+	bellmanFordComputationalVector.push_back(mytuple);
+	get<1>(mytuple) = numeric_limits<int>::max();
+	for (i = 1; i < noOfGraphElements; ++i) bellmanFordComputationalVector.push_back(mytuple);
+
+	// remember to insert edges both ways for an undirected graph
+	vector<vector<tuple<int, int>>> adjacency_list(noOfGraphElements);
+	// 0 source
+	// 1 
+	adjacency_list[1].push_back(make_tuple(0, 2));
+	// 2 
+	adjacency_list[2].push_back(make_tuple(1, 2));
+	// 3 
+	adjacency_list[3].push_back(make_tuple(0, 4));
+	adjacency_list[3].push_back(make_tuple(1, 1));
+	// 4 
+	adjacency_list[4].push_back(make_tuple(2, 2));
+	adjacency_list[4].push_back(make_tuple(3, 4));
+
+
+
+	auto returnedValue = bellmanFord(adjacency_list, bellmanFordComputationalVector, negative_cycle);
+
+	return 0;
+}
+
