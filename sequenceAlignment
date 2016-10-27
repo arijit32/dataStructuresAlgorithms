@@ -1,0 +1,105 @@
+#include <vector>
+#include <iostream>
+#include <tuple>
+#include <algorithm>
+#include <list>
+
+using namespace std;
+
+int sequenceAlignment(const int mismatchWeight, const int gapWeight, tuple<list<char>, list<char>>& stringPair)
+{	 
+	int i, j, penalty = 0;
+	vector< vector<int> > penalty2DArray((get <1>(stringPair)).size(), vector<int>((get <0>(stringPair)).size()));
+	
+	for (i = 1; i < (get <0>(stringPair)).size(); ++i) penalty2DArray[0][i] = i;
+	for (i = 1; i < (get <1>(stringPair)).size(); ++i) penalty2DArray[i][0] = i;
+		
+	auto iter1 = (get <1>(stringPair)).begin();
+	auto iter2 = (get <0>(stringPair)).begin(); ++iter1;
+
+	for (i = 1; i < (get <1>(stringPair)).size(); ++i, ++iter1)
+	{
+		iter2 = (get <0>(stringPair)).begin(); ++iter2;
+		for (j = 1; j < (get <0>(stringPair)).size(); ++j, ++iter2)
+			if (*iter1 == *iter2) penalty2DArray[i][j] = min({ penalty2DArray[i - 1][j - 1], penalty2DArray[i - 1][j] + gapWeight, penalty2DArray[i][j - 1] + gapWeight });
+			else penalty2DArray[i][j] = min({ penalty2DArray[i - 1][j - 1] + mismatchWeight, penalty2DArray[i - 1][j] + gapWeight, penalty2DArray[i][j - 1] + gapWeight });
+		
+	}
+
+	--i; --j; --iter1; --iter2;
+	while (i > 0)
+	{
+		if (*iter1 == *iter2)
+		{
+			if (penalty2DArray[i][j] == penalty2DArray[i - 1][j - 1])
+			{
+				--i; --j; 
+			}
+			else
+			{
+				if (penalty2DArray[i][j] == penalty2DArray[i - 1][j] + gapWeight)
+				{
+					++iter2; (get <0>(stringPair)).insert(iter2, '-'); --j;
+				}
+				else
+				{
+					++iter1; (get <1>(stringPair)).insert(iter1, '-'); --i;
+					
+				}
+			}
+		}
+		else
+		{
+			if (penalty2DArray[i][j] == penalty2DArray[i - 1][j - 1] + mismatchWeight)
+			{
+				--i; --j; 
+			}
+			else
+			{
+				if (penalty2DArray[i][j] == penalty2DArray[i - 1][j] + gapWeight)
+				{
+					++iter2; (get <0>(stringPair)).insert(iter2, '-'); --j;
+				}
+				else
+				{
+					++iter1; (get <1>(stringPair)).insert(iter1, '-'); --i;
+					
+				}
+			}
+		}
+		--iter1; --iter2;
+	}
+
+	return penalty;
+}
+
+int main()
+{
+	int mismatchWeight = 1, gapWeight = 1;
+	tuple<list<char>, list<char>> stringPair;
+	// G A A T T C A G T T A (sequence #1) 
+	(get <0>(stringPair)).push_back('G');
+	(get <0>(stringPair)).push_back('A');
+	(get <0>(stringPair)).push_back('A');
+	(get <0>(stringPair)).push_back('T');
+	(get <0>(stringPair)).push_back('T');
+	(get <0>(stringPair)).push_back('C');
+	(get <0>(stringPair)).push_back('A');
+	(get <0>(stringPair)).push_back('G');
+	(get <0>(stringPair)).push_back('T');
+	(get <0>(stringPair)).push_back('T');
+	(get <0>(stringPair)).push_back('A');
+	// G G A T C G A (sequence #2)
+	(get <1>(stringPair)).push_back('G');
+	(get <1>(stringPair)).push_back('G');
+	(get <1>(stringPair)).push_back('A');
+	(get <1>(stringPair)).push_back('T');
+	(get <1>(stringPair)).push_back('C');
+	(get <1>(stringPair)).push_back('G');
+	(get <1>(stringPair)).push_back('A');
+
+	auto returnedPenalty = sequenceAlignment(mismatchWeight, gapWeight, stringPair);
+	
+	return 0;
+}
+
