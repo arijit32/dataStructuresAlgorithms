@@ -1,0 +1,230 @@
+#include <iostream>
+#include <memory>
+using namespace std;
+
+template <class T>
+class binarySearchTree
+{
+	private:
+
+		struct treeNode
+		{
+			T data;
+			unsigned int nodesCount;
+			shared_ptr<treeNode> left, right;
+		};
+
+		shared_ptr<treeNode> root;
+		
+		void inOrder(shared_ptr<treeNode> tNodeCurr)
+		{
+
+			if (tNodeCurr)
+			{
+				if ((*tNodeCurr).left) inOrder((*tNodeCurr).left);
+				cout << " " << (*tNodeCurr).data << " ";
+				if ((*tNodeCurr).right) inOrder((*tNodeCurr).right);
+			}
+			else return;
+		}
+
+		void preOrder(shared_ptr<treeNode> tNodeCurr)
+		{
+
+			if (tNodeCurr)
+			{
+				cout << " " << (*tNodeCurr).data << " ";
+				if ((*tNodeCurr).left) preOrder((*tNodeCurr).left);				
+				if ((*tNodeCurr).right) preOrder((*tNodeCurr).right);
+			}
+			else return;
+		}
+
+		void postOrder(shared_ptr<treeNode> tNodeCurr)
+		{
+
+			if (tNodeCurr)
+			{				
+				if ((*tNodeCurr).left) postOrder((*tNodeCurr).left);
+				if ((*tNodeCurr).right) postOrder((*tNodeCurr).right);
+				cout << " " << (*tNodeCurr).data << " ";
+			}
+			else return;
+		}
+
+		bool deleteNodeRecursive(T a, shared_ptr<treeNode>& tNodeCurrP)
+		{
+
+			if (tNodeCurrP && (a < (*tNodeCurrP).data))  return deleteNodeRecursive(a, (*tNodeCurrP).left);
+			else if (tNodeCurrP && (a > (*tNodeCurrP).data))  return deleteNodeRecursive(a, (*tNodeCurrP).right);
+			else if (tNodeCurrP && (*tNodeCurrP).data == a)
+			{
+				--(*tNodeCurrP).nodesCount;
+				if (!(*tNodeCurrP).left) tNodeCurrP = (*tNodeCurrP).right;
+				else if (!(*tNodeCurrP).right) tNodeCurrP = (*tNodeCurrP).left;
+				else
+				{
+					shared_ptr<treeNode> tempNodeP = (*tNodeCurrP).left;
+					--(*tempNodeP).nodesCount;
+					while ((*tempNodeP).right)
+					{
+						tempNodeP = (*tempNodeP).right;
+						--(*tempNodeP).nodesCount;
+					}
+					(*tNodeCurrP).data = (*tempNodeP).data;
+					deleteNodeRecursive((*tempNodeP).data, (*tNodeCurrP).left);		
+				}
+				
+				return true;
+			}
+			return false;
+		}
+
+		int getIthOrderStatistic(unsigned int b, shared_ptr<treeNode>& tNodeCurrP)
+		{
+			unsigned int i = 0;
+			if ((*tNodeCurrP).left)	i = (*(*tNodeCurrP).left).nodesCount;
+			if (i == b - 1) return (*tNodeCurrP).data;
+			else if (i >= b) return getIthOrderStatistic(b, (*tNodeCurrP).left);
+			else if (i >= b) return getIthOrderStatistic(b, (*tNodeCurrP).left);
+		}
+
+		unsigned int getRank(T a, unsigned int b, shared_ptr<treeNode>& tNodeCurrP)
+		{
+			if ((*tNodeCurrP).data == a) if ((*tNodeCurrP).left) return	(*(*tNodeCurrP).left).nodesCount + b + 1;
+			else return	b + 1;
+			else if ((*tNodeCurrP).data > a) if ((*tNodeCurrP).left) getRank(a, b, (*tNodeCurrP).left);
+			else return NULL;			
+			else if ((*tNodeCurrP).right) getRank(a, b + (*tNodeCurrP).nodesCount -(*(*tNodeCurrP).right).nodesCount, (*tNodeCurrP).right);
+			else return NULL;
+		}
+
+	public:
+				
+		void insertNode(T a)
+		{
+			shared_ptr<treeNode> tNode = make_shared<treeNode>();
+			
+			(*tNode).data = a;
+			++(*tNode).nodesCount;
+			
+			if (root == NULL) root = tNode;			
+			else
+			{
+				shared_ptr<treeNode> tNodeCurr = root, tNodeParent;
+
+				// Find the Node's parent
+				while (tNodeCurr)
+				{
+					++(*tNodeCurr).nodesCount;
+					tNodeParent = tNodeCurr;
+
+					if ((*tNode).data <= (*tNodeCurr).data) tNodeCurr = (*tNodeCurr).left;
+					else tNodeCurr = (*tNodeCurr).right;
+				}
+
+				//insert new node
+				if ((*tNode).data <= (*tNodeParent).data) (*tNodeParent).left = tNode;
+				else (*tNodeParent).right = tNode;
+
+			}
+		}
+
+		void printInOrder()
+		{
+			inOrder(root);
+		}
+		
+		void printPreOrder()
+		{
+			preOrder(root);
+		}
+
+		void printPostOrder()
+		{
+			postOrder(root);
+		}
+
+		bool deleteNode(T a)
+		{
+			if (root) return deleteNodeRecursive(a, root);
+
+		}
+
+		void printIthOrderStatistic(unsigned int b)
+		{
+			if (b > (*root).nodesCount) cout << " Fewer elements in tree than ith order requested " << endl;
+			else cout << "Ith order statistic is " << getIthOrderStatistic(b, root);
+		}
+
+		void printRank(T a)
+		{
+			auto i = getRank(a, 0, root);
+			if (i) cout << " Rank is : " << i;
+			else cout << " Rank is unavailable ";
+			cout << endl;
+		}
+};
+
+int main()
+{
+	int a;
+	unsigned int choice, b;
+
+	shared_ptr<binarySearchTree<int>> binarySearchTreePtr = make_shared<binarySearchTree<int>>() ;
+	(*binarySearchTreePtr).insertNode(3);
+	(*binarySearchTreePtr).insertNode(1);
+	(*binarySearchTreePtr).insertNode(5);
+	(*binarySearchTreePtr).insertNode(2);
+	(*binarySearchTreePtr).insertNode(4);
+	(*binarySearchTreePtr).insertNode(6);
+
+	//exit loop when tree operations are over
+	while (1)
+	{
+		cout << endl << endl << " Binary Search Tree Operations " << endl << " ----------------------------- " << endl << " 1. Insertion/Creation " << endl << " 2. In-Order Traversal " << endl << " 3. Pre-Order Traversal " << endl << " 4. Post-Order Traversal " << endl << " 5. Node Deletion " << endl << " 6. Get Ith order statistic " << endl << " 7. Rank of input element " << endl << " 8. Exit " << endl << " Enter your choice : ";
+		cin >> choice;
+		switch (choice)
+		{
+			case 1: 
+				cout << " Enter Number to be inserted : ";
+				cin >> a;
+				(*binarySearchTreePtr).insertNode(a);
+				break;
+			case 2: 
+				cout << endl << " In-Order Traversal " << endl;
+				cout << " -------------------" << endl;
+				(*binarySearchTreePtr).printInOrder();
+				break;
+			case 3: 
+				cout << endl << " Pre-Order Traversal " << endl << " -------------------" << endl;
+				(*binarySearchTreePtr).printPreOrder();
+				break;
+			case 4: 
+				cout << endl << " Post-Order Traversal " << endl << " --------------------" << endl;
+				(*binarySearchTreePtr).printPostOrder();
+				break;
+			case 5: 
+				cout << " Enter node to be deleted : ";
+				cin >> a;
+				if ((*binarySearchTreePtr).deleteNode(a) == true) cout << "Node was deleted" << endl;
+				else cout << "Node was not found" << endl;
+				break;
+			case 6:
+				cout << " 6. Enter Ith order (non-negative integer) for statistic : ";
+				cin >> b;
+				(*binarySearchTreePtr).printIthOrderStatistic(b);
+				break;
+			case 7:
+				cout << " 7. Enter element whose rank is needed : ";
+				cin >> a;
+				(*binarySearchTreePtr).printRank(a);
+				break;
+			case 8:
+				return 0;
+		}
+	}
+
+
+	return 0;
+}
