@@ -1,0 +1,126 @@
+// template test.
+// contains all source code
+
+#include <iostream>
+#include <algorithm>
+#include <random>
+#include <vector>
+#include <fstream>
+#include <ctime>
+#include <cmath>
+#include <iterator>
+#include <string>
+#include <map>
+#include <queue>
+#include <limits> // for numeric_limits
+#include <set>
+#include <utility> // for pair
+#include <array>  
+
+using namespace std;
+
+
+void depthFirstSearch(const vector<vector<tuple<int, int>>>& adjacency_list, const int startNode, int& pathCount, const int s, map<int, tuple<int, int>>& nodesTraversed)
+{
+
+	if (adjacency_list.size() < 2)
+	{
+		if (adjacency_list.size() < 1)
+		{
+			get<0>(nodesTraversed[0]) = -1;
+			get<1>(nodesTraversed[0]) = -1;
+		}
+		else
+		{
+			get<0>(nodesTraversed[0]) = 0;
+			get<1>(nodesTraversed[0]) = 0;
+		}
+	}
+	else
+	{		
+		get<0>(nodesTraversed[startNode]) = s;
+		for (vector<tuple<int, int>>::const_iterator iTer = adjacency_list[startNode].begin(); iTer != adjacency_list[startNode].end(); ++iTer)	if (nodesTraversed.find(get<0>(*iTer)) == nodesTraversed.end())	depthFirstSearch(adjacency_list, get<0>(*iTer), pathCount, s, nodesTraversed);			
+		get<1>(nodesTraversed[startNode]) = ++pathCount;
+
+	}
+
+}
+
+map <int, int> dFSStrongComponents(const vector<vector<tuple<int, int>>>& adjacency_list, int& pathCount, map<int, tuple<int, int>>& nodesTraversed)
+{
+	int i = 0, s;
+
+	vector<vector<tuple<int, int>>> temp_adjacency_list(adjacency_list.size());
+	vector<vector<tuple<int, int>>>::const_iterator cIter1;
+	vector<tuple<int, int>>::const_iterator cIter2;
+	for (cIter1 = adjacency_list.begin(); cIter1 != adjacency_list.end(); ++cIter1, ++i) for (cIter2 = (*cIter1).begin(); cIter2 != (*cIter1).end(); ++cIter2) temp_adjacency_list[get<0>(*cIter2)].push_back(make_tuple(i, get<1>(*cIter2)));
+		
+	for (i = adjacency_list.size() - 1; i >= 0; --i)
+	{
+		if (nodesTraversed.find(i) == nodesTraversed.end())
+		{
+			s = i;
+			depthFirstSearch(temp_adjacency_list, i, pathCount, s, nodesTraversed);
+		}
+	}
+
+	temp_adjacency_list.clear();
+	temp_adjacency_list.resize(adjacency_list.size());
+	i = 0;
+	map <int, int> renamedNodeMap;
+	for (cIter1 = adjacency_list.begin(); cIter1 != adjacency_list.end(); ++cIter1, ++i)
+	{
+		renamedNodeMap[get<1>(nodesTraversed[i])] = i;
+		for (cIter2 = (*cIter1).begin(); cIter2 != (*cIter1).end(); ++cIter2) temp_adjacency_list[get<1>(nodesTraversed[i])].push_back(make_tuple(get<1>(nodesTraversed[get<0>(*cIter2)]), get<1>(*cIter2)));		
+	}
+
+	pathCount = -1;
+	nodesTraversed.clear();
+	for (i = adjacency_list.size() - 1; i >= 0; --i)
+	{
+		if (nodesTraversed.find(i) == nodesTraversed.end())
+		{
+			s = i;
+			depthFirstSearch(temp_adjacency_list, i, pathCount, s, nodesTraversed);
+		}
+	}
+
+	return renamedNodeMap;
+}
+
+int main()
+{
+	// remember to insert edges both ways for an undirected graph
+	vector<vector<tuple<int, int>>> adjacency_list(10);
+	// 0 = a no connected components
+	// 1 = b
+	adjacency_list[1].push_back(make_tuple(4, 15));
+	// 2 = c
+	adjacency_list[2].push_back(make_tuple(8, 11));
+	// 3 = d
+	adjacency_list[3].push_back(make_tuple(6, 11));
+	// 4 = e
+	adjacency_list[4].push_back(make_tuple(7, 11));
+	// 5 = f
+	adjacency_list[5].push_back(make_tuple(2, 11));
+	// 6 = g
+	adjacency_list[6].push_back(make_tuple(9, 11));
+	// 7 = h
+	adjacency_list[7].push_back(make_tuple(1, 11));
+	// 8 = i
+	adjacency_list[8].push_back(make_tuple(5, 11));
+	adjacency_list[8].push_back(make_tuple(6, 11));
+	// 9 = j
+	adjacency_list[9].push_back(make_tuple(3, 11));
+	adjacency_list[9].push_back(make_tuple(7, 11));
+	
+	
+	auto path_count = -1;
+	map<int, tuple<int, int>> nodesTraversed;
+
+	auto renamedNodeMap = dFSStrongComponents(adjacency_list, path_count, nodesTraversed);
+
+	return 0;
+
+}
+
