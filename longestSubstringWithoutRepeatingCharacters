@@ -1,0 +1,69 @@
+#include <iostream>
+#include <string>
+#include <unordered_map>
+#include <tuple>
+
+using namespace std;
+
+tuple<unsigned int, unsigned int, string> findLongestString(const string& charString)
+{
+	tuple<unsigned int, unsigned int, string> result;
+	unordered_map<char, int> charLocation;
+	unsigned int i, j = 0;
+
+	for (i = 97; i <= 122; ++i) charLocation[char(i)] = -1;
+
+	unordered_map<char, int>::iterator unorderedMapCharLocation = charLocation.find(charString[0]);
+	if (unorderedMapCharLocation != charLocation.end())
+	{
+		(*unorderedMapCharLocation).second = 0;
+		get <0>(result) = 0; get <1>(result) = 1; 
+		//get <2>(result) = charString[0];
+
+		for (i = 1; i < charString.length(); ++i)
+		{
+			unorderedMapCharLocation = charLocation.find(charString[i]);
+			if ((*unorderedMapCharLocation).second >= 0)
+			{
+				if ((i - j) > get <1>(result))
+				{
+					get <0>(result) = j; get <1>(result) = i - j;
+					
+				} 
+				j = i + 1;
+			}
+			else
+			{
+				(*unorderedMapCharLocation).second = i;
+				//j = i + 1;
+			}
+		}
+
+		if ((i - j) > get <1>(result))
+		{
+			get <0>(result) = j; get <1>(result) = i - j;
+
+		}
+	}
+
+	get <2>(result) = charString.substr(get <0>(result), get <1>(result));
+
+	return result;
+}
+
+int main()
+{
+	int i, j;
+	string charString = "aa";
+	
+
+	auto result = findLongestString(charString);
+
+	charString = "abcabcbb";
+	result = findLongestString(charString);
+
+	charString = "abcabcbbxpqr";
+	result = findLongestString(charString);
+
+	return 0;
+}
