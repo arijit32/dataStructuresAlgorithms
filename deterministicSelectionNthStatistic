@@ -1,0 +1,233 @@
+// Deterministic Selection.
+// contains all source code
+
+#include <iostream>
+#include <algorithm>
+#include <random>
+#include <vector>
+#include <fstream>
+#include <cmath>
+#include <iterator>
+
+using namespace std;
+
+
+
+double dSelect(vector<double>& vec, unsigned int start_pos, unsigned int end_pos, unsigned int i_th_statistic, int exit_recursion)
+{
+	unsigned int i, l, remainder;
+	int j;
+
+	if ((end_pos - start_pos) > 0)
+	{
+		auto m = -1;
+
+		if ((end_pos - start_pos) < 10)
+		{
+
+			//run insertion sort loop 
+			for (i = start_pos + 1; i <= end_pos; ++i)
+			{
+				j = i - 1;
+				
+				auto swap = vec[i];
+				auto k = -1;
+				while (j >= 0)
+				{
+					if (swap < vec[j])
+					{
+						// the statement below may be superfluous, as simply j can be tracked using the break statement
+						// this is especially true as for small data sets, all the data will be stored in RAM
+						k = j;
+						vec[j + 1] = vec[j];
+					}
+					else
+					{
+						break;
+					}
+					--j;
+				}
+				if (k >= 0)
+				{
+					vec[k] = swap;
+				}
+			}
+
+			return vec[i_th_statistic];
+		}
+		else
+		{ 
+
+			
+
+			vector<double> medians(((end_pos - start_pos) / 5) + 1);
+
+			for (l = start_pos; l <= end_pos; l += 5)
+			{
+				//run insertion sort loop for 5 elements each
+				for (i = l + 1; (i < l + 5) && (i <= end_pos); ++i)
+				{
+					j = i - 1;				
+					auto swap = vec[i];
+					auto k = -1;
+					while (j >= 0)
+					{
+						if (swap < vec[j])
+						{
+							// the statement below may be superfluous, as simply j can be tracked using the break statement
+							// this is especially true as for small data sets, all the data will be stored in RAM
+							k = j;
+							vec[j + 1] = vec[j];
+						}
+						else
+						{
+							break;
+						}
+						--j;
+					}
+					if (k >= 0)
+					{
+						vec[k] = swap;
+					}
+				}
+
+				++m;
+				remainder = (i - l) % 5;
+				if (remainder == 0) medians[m] = vec[i - 3];
+				else
+				{
+					if (remainder == 4) medians[m] = vec[i - 3];
+					else
+					{
+						if (remainder == 3) medians[m] = vec[i - 2];
+						else
+						{
+							if (remainder == 2) medians[m] = vec[i - 1];
+							else medians[m] = vec[i - 1];
+						}
+					}
+				}
+
+			}
+
+			double median;
+			if (m > 1) median = dSelect(medians, 0, m, m / 2, -1);
+			else
+			{
+				median = medians[0];
+				//exit_recursion = 0;
+				//return median;
+			}
+
+			for (l = start_pos; l <= end_pos; ++l)
+			{
+				if (vec[l] == median)
+				{
+
+					swap(vec[start_pos], vec[l]);
+
+					i = start_pos;
+					j = start_pos + 1;
+					while (j <= end_pos)
+					{
+						if (vec[j] < median)
+						{
+							++i;
+							swap(vec[i], vec[j]);
+						}
+						++j;
+					}
+					swap(vec[start_pos], vec[i]);
+
+					break;
+				}
+			}
+
+
+
+
+
+
+			if (i == i_th_statistic)
+			{
+				exit_recursion = 0;
+				return median;
+			}
+			if (i > i_th_statistic)
+			{
+				if (i > start_pos) return dSelect(vec, start_pos, i - 1, i_th_statistic, exit_recursion);
+			}
+			else
+			{
+				if (i < end_pos) return dSelect(vec, i + 1, end_pos, i_th_statistic, exit_recursion);
+			}
+
+
+		}
+	}
+	else return vec[start_pos];
+
+}
+
+int main()
+{
+	int i_th_statistic = 20;
+
+	cout << "Program to read in file of random numbers and sort using Quicksort" << endl;
+	ifstream fpInput("C:/Users/Arijit/Google Drive/DataStrucAndAlgo/Projects/Datasets/Inputs/IntegerArray.txt");
+	if (fpInput.is_open())
+	{
+
+		cout << "Opened input file successfully!" << endl;
+
+		//i = 0;
+		//while (i < 20)
+		//while (fpInput >> random_integers[i])
+		//{
+		//	fpInput >> random_integers[i];
+		//	++i;
+		//	cout << i << endl;
+		//}
+		vector<double> random_integers{ istream_iterator<int>{fpInput},{} };
+		//random_integers.resize(100003);
+		//vector<int> random_integers_copy(random_integers.size());
+
+		fpInput.close();
+
+		//ith statistic starts with array position 0, so 4 would mean 5th position
+		auto statistic_result = dSelect(random_integers, 0, random_integers.size() - 1, 4, -1);
+		//auto statistic_result = dSelect(random_integers, 0, 10, 4, -1);
+
+		cout << "sorted array\n";
+		//for (i = 0; i < random_integers.size(); i++)
+		//{
+		//	cout << endl << random_integers[i];
+		//}
+		//cout << endl << endl;
+		copy(random_integers.begin(), random_integers.end(), ostream_iterator<int>(cout, "\n"));
+
+		ofstream fpOutput;
+		fpOutput.open("C:/Users/Arijit/Google Drive/DataStrucAndAlgo/Projects/Datasets/Outputs/MergeSortOutput.txt");
+		copy(random_integers.begin(), random_integers.end(), ostream_iterator<int>(fpOutput, "\n"));
+		fpOutput.close();
+
+		system("pause");
+		return 0;
+
+	}
+	else
+	{
+
+		cout << "Unable to open input file " << endl;
+		system("pause");
+
+		return 1;
+
+	}
+
+
+
+
+
+}
+
