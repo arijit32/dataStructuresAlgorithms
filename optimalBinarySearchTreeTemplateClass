@@ -1,0 +1,118 @@
+#include <vector>
+#include <iostream>
+#include <tuple>
+#include <algorithm>
+#include <list>
+#include <memory>
+#include <limits>       // std::numeric_limits
+
+using namespace std;
+
+class binarySearchTree
+{
+public:
+
+	struct treeNode
+	{
+		char data;
+		shared_ptr<treeNode> left, right;
+	};
+
+	shared_ptr<treeNode> root;
+
+	void fillTree(vector< vector<int> >& rIJ)
+	{
+		unsigned int i, j, tempNode = 0, n = 0;
+		shared_ptr<treeNode> tNodeCurr, tNodeStart = root ;
+
+		for (i = 0; i < rIJ.size(); ++i)
+		{
+			if (rIJ[i][rIJ.size() - 1] != tempNode)
+			{
+				j = rIJ.size() - 2; tempNode = rIJ[i][rIJ.size() - 1]; 
+								
+				if (n == 0)
+				{
+					root = make_shared<treeNode>();
+					tNodeCurr = root; tNodeStart = root; ++n;
+				}
+				else
+				{
+					tNodeCurr = make_shared<treeNode>();
+					(*tNodeStart).right = tNodeCurr;
+					tNodeStart = (*tNodeStart).right;
+				}
+				(*tNodeCurr).data = rIJ[i][j];
+
+				while (j > 0)
+				{
+					if (rIJ[i][j] != rIJ[i][j + 1])
+					{
+						(*tNodeCurr).left = make_shared<treeNode>(); tNodeCurr = (*tNodeCurr).left; (*tNodeCurr).data = rIJ[i][j];
+					}
+					--j;
+				}
+			}
+		}
+	}
+};
+
+tuple<unsigned int, shared_ptr<binarySearchTree>> optimalBinarySearchTree(const vector<tuple<int, int>>& integerData)
+{
+	tuple<unsigned int, shared_ptr<binarySearchTree>> result;
+	unsigned int weightedAverageSearchTime = 0, i, j, k, r, root, tempUnsignedInt1, tempUnsignedInt2;
+	vector< vector<int> > wIJ(integerData.size(), vector<int>(integerData.size())), rIJ(integerData.size(), vector<int>(integerData.size())), pIJ(integerData.size(), vector<int>(integerData.size()));
+	// w - weights, r - roots, p - probabilities
+	
+	for (i = 0; i < integerData.size() - 1; ++i)
+	{
+		j = i + 1;
+		wIJ[i][j] = pIJ[i][j] = get <1>(integerData[j]);
+		rIJ[i][j] = get <0>(integerData[j]);
+		
+	}
+		 
+	for (i = 0; i < integerData.size() - 2; ++i) for (j = i + 2; j < integerData.size(); ++j) pIJ[i][j] = pIJ[i][j - 1] + pIJ[j - 1][j];
+	
+	for (j = 2; j < integerData.size(); ++j)
+	{
+		for (i = 0; i < integerData.size() - j; ++i)
+		{
+			tempUnsignedInt1 = numeric_limits<int>::max();
+			for (r = i; r < i + j; ++r)
+			{
+				tempUnsignedInt2 = wIJ[i][r] + wIJ[r + 1][i + j];
+				if (tempUnsignedInt2 < tempUnsignedInt1)
+				{
+					tempUnsignedInt1 = tempUnsignedInt2; root = rIJ[r][r + j - 1];
+				}
+			}
+			wIJ[i][i + j] = pIJ[i][i + j] + tempUnsignedInt1;  rIJ[i][i + j] = root;
+		}
+	}
+
+	shared_ptr<binarySearchTree> optimalBinarySearchTreePtr = make_shared<binarySearchTree>();
+	
+	(*optimalBinarySearchTreePtr).fillTree(rIJ);
+	result = make_tuple(wIJ[0][integerData.size() - 1], optimalBinarySearchTreePtr);
+
+	return result;
+}
+
+int main()
+{
+	int mismatchWeight = 1, gapWeight = 1;
+	vector<tuple<int, int>> integerData;
+	integerData.push_back(make_tuple(0, 0));
+	integerData.push_back(make_tuple(1, 5));
+	integerData.push_back(make_tuple(2, 10));
+	integerData.push_back(make_tuple(3, 2));
+	integerData.push_back(make_tuple(4, 3));
+	integerData.push_back(make_tuple(5, 4));
+	sort(integerData.begin(), integerData.end(), less<tuple<int, int>>());
+
+	auto returnedPenalty = optimalBinarySearchTree(integerData);
+	
+	return 0;
+}
+
