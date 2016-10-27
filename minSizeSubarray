@@ -1,0 +1,57 @@
+// map::find
+#include <iostream>
+#include <vector>
+#include <tuple>
+#include <limits>
+
+using namespace std;
+
+tuple<int, int, int> minSizeSubarray(vector<int>& inputVect, int targetSum)
+{
+	tuple<int, int, int> minSizeSubarrayResult;
+	int start = 0, end = 0, tempSum = 0;
+
+	get<0>(minSizeSubarrayResult) = numeric_limits<int>::max();
+
+	while (end < int (inputVect.size()))
+	{
+		while (tempSum <= targetSum && end < int (inputVect.size()))
+			tempSum += inputVect[end++];
+		
+		while ((tempSum > targetSum) && (start < end) && (end < int (inputVect.size())))
+			tempSum -= inputVect[start++];
+		
+		if (tempSum >= targetSum)
+		{
+			if ((end - start) < get <0>(minSizeSubarrayResult))
+			{
+				get<0>(minSizeSubarrayResult) = end - start ;
+				get<1>(minSizeSubarrayResult) = start ;
+				get<2>(minSizeSubarrayResult) = end - 1;
+			}
+		}
+
+	}
+
+	return minSizeSubarrayResult;;
+}
+
+int main()
+{
+	vector<int> inputVect;
+	int targetSum = 7;
+
+	//inputVect.push_back(2);
+	//inputVect.push_back(3);
+	//inputVect.push_back(1);
+	//inputVect.push_back(2);
+	//inputVect.push_back(4);
+	inputVect.push_back(3);
+	//inputVect.push_back(7);
+	inputVect.push_back(6);
+
+	auto result = minSizeSubarray(inputVect, targetSum);
+
+	
+	return 0;
+}
