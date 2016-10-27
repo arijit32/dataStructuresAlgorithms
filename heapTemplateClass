@@ -1,0 +1,145 @@
+//program to implement min / max heap
+#include <iostream>
+#include <vector>
+#include <iterator>
+#include <cmath>
+using namespace std;
+
+template <class T>
+class minMaxHeap
+{
+public:
+	vector<T> minMaxHeapVector;
+	int minMaxHeapFlag; // 0 min heap, 1 ma heap, 2 heap array not yet heapified
+
+	minMaxHeap()
+	{
+		minMaxHeapFlag = 2;
+	}
+
+	void maxHeapify(int i)
+	{
+		unsigned int left = (2 * i) + 1, right = (2 * i) + 2, maxLocation = i;
+		
+		if (left < minMaxHeapVector.size()) if (minMaxHeapVector[i] < minMaxHeapVector[left]) maxLocation = left;
+		if (right < minMaxHeapVector.size()) if (minMaxHeapVector[maxLocation] < minMaxHeapVector[right]) maxLocation = right;
+
+		if (maxLocation != i)
+		{
+			swap(minMaxHeapVector[maxLocation] , minMaxHeapVector[i]);
+			maxHeapify(maxLocation);
+		}
+	}
+
+};
+
+int main()
+{
+	unsigned int choice, i, j;
+	int tempInt;
+
+	minMaxHeap<int> h;
+	vector<int>::const_iterator cIter1;
+
+	h.minMaxHeapVector.push_back(100);
+	h.minMaxHeapVector.push_back(19);
+	h.minMaxHeapVector.push_back(36);
+	h.minMaxHeapVector.push_back(17);
+	h.minMaxHeapVector.push_back(3);
+	h.minMaxHeapVector.push_back(25);
+	h.minMaxHeapVector.push_back(1);
+	h.minMaxHeapVector.push_back(2);
+	h.minMaxHeapVector.push_back(7);
+
+	//exit loop when heap operations are over
+	while (1)
+	{
+		cout << endl << endl << " Heap Operations " << endl << " ----------------------------- " << endl << " 1. Display heap contents " << endl << " 2. Insert an element " << endl << " 3. Delete an element  " << endl << " 4. Extract root " << endl << " 5. Return root " << endl << " 6. Min heapify array " << endl << " 7. Max heapify array " << endl << " 8. Exit " << endl << " Enter your choice : ";
+		cin >> choice;
+		switch (choice)
+		{
+		case 1:
+			// Display heap contents 
+			for (cIter1 = h.minMaxHeapVector.begin(); cIter1 != h.minMaxHeapVector.end(); ++cIter1) cout << *cIter1 << "  ";
+			break;
+		case 2:
+			// Insert an element 
+			if (h.minMaxHeapFlag == 2) cout << "Input vector not heapified" << endl;
+			else
+			{
+				cout << "Please enter element to insert" << endl;
+				cin >> tempInt;
+				h.minMaxHeapVector.push_back(tempInt);
+				i = h.minMaxHeapVector.size() - 1;
+				if (h.minMaxHeapFlag == 0) // min heap
+				{
+					while (1)
+					{
+						j = i;  i = (unsigned int) floor(i / 2);
+						if (h.minMaxHeapVector[i] > h.minMaxHeapVector[j]) swap(h.minMaxHeapVector[i], h.minMaxHeapVector[j]);
+						if (i == 0) break;
+					}
+				}
+				else //max heap
+				{
+					while (1)
+					{
+						j = i;  i = (unsigned int) floor(i / 2);
+						if (h.minMaxHeapVector[i] < h.minMaxHeapVector[j]) swap(h.minMaxHeapVector[i], h.minMaxHeapVector[j]);
+						if (i == 0) break;
+					}
+				}
+			}
+			break;
+		case 3:
+			// Delete an element 
+
+			break;
+		case 4:
+			// Extract root 
+			if (h.minMaxHeapFlag == 2) cout << "Input vector not heapified" << endl;
+			else
+			{
+				if (h.minMaxHeapVector.size() > 0)
+				{
+					tempInt = h.minMaxHeapVector[0];
+					cout << "the root " << tempInt << " hes been extracted from the heap. " << h.minMaxHeapVector.size() << " elements remain in the heap" << endl;
+				}
+			}
+			break;
+		case 5:
+			// Return root 
+			if (h.minMaxHeapFlag == 2) cout << "Input vector not heapified" << endl;
+			else
+			{
+				if (h.minMaxHeapVector.size() > 0)
+				{
+					tempInt = h.minMaxHeapVector[0];
+					cout << "the root is " << tempInt << ". The heap has " << h.minMaxHeapVector.size() << " elements remain in the heap" << endl;
+				}
+			}
+			break;
+		case 6:
+			// Min heapify array 
+			for (i = h.minMaxHeapVector.size(); i >= 0; --i) h.maxHeapify(i);
+			break;
+		case 7:
+			// Max heapify array 
+			i = floor(h.minMaxHeapVector.size() / 2) - 1;
+			while (1)
+			{
+				h.maxHeapify(i);
+				--i;
+				if (i == 0) break;
+			}
+			h.minMaxHeapFlag = 1;
+			break;
+		case 8:
+			// Exit
+			return 0;
+		}
+	}
+
+
+	return 0;
+}
