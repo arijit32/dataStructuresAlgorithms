@@ -1,0 +1,160 @@
+// template test.
+// contains all source code
+
+#include <iostream>
+#include <algorithm>
+#include <random>
+#include <vector>
+#include <fstream>
+#include <ctime>
+#include <cmath>
+#include <iterator>
+#include <string>
+#include <map>
+#include <limits> // for numeric_limits
+#include <set>
+#include <utility> // for pair
+#include <array>  
+
+using namespace std;
+
+typedef pair<int, int> node_pair;
+typedef pair<int, double> neighbor;
+typedef vector<vector<neighbor> > adjacency_list_t;
+
+int countEdges(const adjacency_list_t& adjacency_list)
+{
+	auto no_of_edges = 0;
+
+	for (auto i = 0; i < adjacency_list.size(); ++i)
+	{
+		const vector<neighbor>& neighbors = adjacency_list[i];
+		for (vector<neighbor>::const_iterator neighbor_iter = neighbors.begin(); neighbor_iter != neighbors.end(); neighbor_iter++) ++no_of_edges;
+
+	}
+
+	return no_of_edges / 2;
+}
+
+pair<vector<vector< int>>, vector<vector< int>>> randomContraction(const adjacency_list_t& adjacency_list, int& min_cuts)
+{
+	pair<vector<vector< int>>, vector<vector< int>>> min_cut_result;
+
+	if (adjacency_list.size() < 2)
+	{
+		min_cut_result.first.push_back({ -1 });
+		min_cut_result.second.push_back({ -1 });
+	}
+	else
+	{
+		if (adjacency_list.size() > 2)
+		{
+
+			auto no_of_edges = countEdges(adjacency_list);
+
+			srand(time(NULL));
+
+			int ubound = log(no_of_edges)*adjacency_list.size()*adjacency_list.size();
+			int node_no, no_of_cuts;
+			vector<vector< int>> modifiedNodeList;
+			vector<vector< int>> modifiedEdgeList;
+			vector<int> tempVector;
+			int j, k, l;
+
+			for (auto i = 0; i < ubound; ++i)
+			//for (auto i = 0; i < 6; ++i)
+			{
+
+				modifiedNodeList.clear();
+				modifiedEdgeList.clear();
+				
+				for (j = 0; j < adjacency_list.size(); ++j)
+				{
+					modifiedNodeList.push_back({ j });
+
+					tempVector.clear();
+					const vector<neighbor>& neighbors = adjacency_list[j];
+					for (vector<neighbor>::const_iterator neighbor_iter = neighbors.begin(); neighbor_iter != neighbors.end(); neighbor_iter++) tempVector.push_back(neighbor_iter->first);
+					modifiedEdgeList.push_back(tempVector);
+									
+				}
+								
+				j = 0;
+				while (j < adjacency_list.size() - 2)
+				{
+					node_no = rand() % (adjacency_list.size() - j);
+					auto deleteNodeIndex = modifiedEdgeList[node_no][rand() % modifiedEdgeList[node_no].size()];
+
+					for (k = 0; k < modifiedNodeList[deleteNodeIndex].size(); ++k) modifiedNodeList[node_no].push_back(modifiedNodeList[deleteNodeIndex][k]);
+					for (l = 0; l < modifiedEdgeList.size(); ++l)
+					{
+						if (l != deleteNodeIndex)
+						{ 
+
+							if (l == node_no)
+							{
+								modifiedEdgeList[l].erase(remove(modifiedEdgeList[l].begin(), modifiedEdgeList[l].end(), deleteNodeIndex), modifiedEdgeList[l].end());
+								copy_if(modifiedEdgeList[deleteNodeIndex].begin(), modifiedEdgeList[deleteNodeIndex].end(), back_inserter(modifiedEdgeList[l]), [l](int k) {return k != l; });								
+							}
+
+							for (k = 0; k < modifiedEdgeList[l].size(); ++k)
+							{
+								if (modifiedEdgeList[l][k] == deleteNodeIndex) modifiedEdgeList[l][k] = node_no;
+								if (modifiedEdgeList[l][k] > deleteNodeIndex) --modifiedEdgeList[l][k];
+							}							
+						}
+					}
+
+					modifiedNodeList.erase(modifiedNodeList.begin() + deleteNodeIndex);
+					modifiedEdgeList.erase(modifiedEdgeList.begin() + deleteNodeIndex);
+
+					++j;
+				}
+
+				if (modifiedEdgeList[0].size() < min_cuts)
+				{
+					min_cuts = modifiedEdgeList[0].size();
+					min_cut_result.first = modifiedNodeList;
+					min_cut_result.second = modifiedEdgeList;
+				}
+			}
+
+		}
+		else
+		{
+			min_cut_result.first.push_back({ 0, 1 });
+			min_cut_result.second.push_back({ 0, 1 });
+		}
+	}
+
+	return min_cut_result;
+
+}
+
+int main()
+{
+	// remember to insert edges both ways for an undirected graph
+	adjacency_list_t adjacency_list(4);
+	// 0 = a
+	adjacency_list[0].push_back(neighbor(1, 7));
+	adjacency_list[0].push_back(neighbor(1, 9));
+	adjacency_list[0].push_back(neighbor(2, 14));
+	adjacency_list[0].push_back(neighbor(3, 14));
+	// 1 = b
+	adjacency_list[1].push_back(neighbor(0, 7));
+	adjacency_list[1].push_back(neighbor(0, 10));
+	adjacency_list[1].push_back(neighbor(2, 15));
+	// 2 = c
+	adjacency_list[2].push_back(neighbor(0, 9));
+	adjacency_list[2].push_back(neighbor(1, 10));
+	adjacency_list[2].push_back(neighbor(3, 11));
+	// 3 = d
+	adjacency_list[3].push_back(neighbor(0, 15));
+	adjacency_list[3].push_back(neighbor(2, 11));
+	
+	auto min_cuts = numeric_limits<int>::max();
+	auto returned_pairs = randomContraction(adjacency_list, min_cuts);
+
+	return 0;
+}
+
