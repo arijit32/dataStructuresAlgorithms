@@ -1,0 +1,79 @@
+// template test.
+// contains all source code
+
+#include <iostream>
+#include <algorithm>
+#include <random>
+#include <vector>
+#include <fstream>
+#include <ctime>
+#include <cmath>
+#include <iterator>
+#include <string>
+#include <map>
+#include <queue>
+#include <limits> // for numeric_limits
+#include <set>
+#include <utility> // for pair
+#include <array>  
+
+using namespace std;
+
+
+void depthFirstSearch(const vector<vector<tuple<int, int>>>& adjacency_list, const int startNode, int& pathCount, int& topological_rank_variable, map<int, tuple<int, int>>& nodesTraversed)
+{
+
+	if (adjacency_list.size() < 2)
+	{
+		if (adjacency_list.size() < 1)
+		{
+			get<0>(nodesTraversed[0]) = -1;
+			get<1>(nodesTraversed[0]) = -1;
+		}
+		else
+		{
+			get<0>(nodesTraversed[0]) = 0;
+			get<1>(nodesTraversed[0]) = 0;
+		}
+	}
+	else
+	{		
+		get<0>(nodesTraversed[startNode]) = ++pathCount;		
+		for (vector<tuple<int, int>>::const_iterator iTer = adjacency_list[startNode].begin(); iTer != adjacency_list[startNode].end(); ++iTer)	if (nodesTraversed.find(get<0>(*iTer)) == nodesTraversed.end())	depthFirstSearch(adjacency_list, get<0>(*iTer), pathCount, topological_rank_variable, nodesTraversed);			
+		get<1>(nodesTraversed[startNode]) = --topological_rank_variable;
+
+	}
+
+}
+
+void dFSTopologicalSort(const vector<vector<tuple<int, int>>>& adjacency_list, int& pathCount, map<int, tuple<int, int>>& nodesTraversed)
+{
+	int topological_rank_variable = adjacency_list.size();
+
+	for (int i = 0; i < adjacency_list.size(); ++i) if (nodesTraversed.find(i) == nodesTraversed.end()) depthFirstSearch(adjacency_list, i, pathCount, topological_rank_variable, nodesTraversed);
+
+}
+
+int main()
+{
+	// remember to insert edges both ways for an undirected graph
+	vector<vector<tuple<int, int>>> adjacency_list(4);
+	// 0 = a
+	adjacency_list[0].push_back(make_tuple(1, 7));
+	adjacency_list[0].push_back(make_tuple(2, 14));
+	// 1 = b
+	adjacency_list[1].push_back(make_tuple(3, 15));
+	// 2 = c
+	adjacency_list[2].push_back(make_tuple(3, 11));
+	// 3 = d
+	// node 3 is a sink
+	
+	auto path_count = -1;
+	map<int, tuple<int, int>> nodesTraversed;
+
+	dFSTopologicalSort(adjacency_list, path_count, nodesTraversed);
+
+	return 0;
+
+}
+
