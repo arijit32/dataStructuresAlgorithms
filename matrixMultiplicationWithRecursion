@@ -1,0 +1,124 @@
+// ConsoleApplication2.cpp : Defines the entry point for the console application.
+// contains all source code
+
+#include <iostream>
+#include <algorithm>
+#include <vector>
+#include <fstream>
+#include <cmath>
+#include <iterator>
+
+using namespace std;
+
+// the program works for square matrices only
+// hence it follows that the matrices have the same dimensions
+// for non-square, another implementation is needed
+vector< vector<int> > MatrixMultiplication(vector< vector<int> > &matrixA, vector< vector<int> > &matrixB)
+{
+	unsigned int matrix_first_partition_size, ii, jj, kk;
+	vector< vector<int> > matrix_result(matrixA.size(), vector<int>(matrixA.size()));
+
+	//matrix_size = matrixA.size();
+	if (matrixA.size() < 3)
+	{
+		for (ii = 0; ii < matrixA.size(); ++ii)
+		{
+			for (jj = 0; jj < matrixA.size(); ++jj)
+			{
+				for (kk = 0; kk < matrixA.size(); ++kk)
+				{
+					matrix_result[ii][jj] = matrix_result[ii][jj] + (matrix_result[ii][kk] * matrix_result[kk][jj]);
+				}
+			}
+		}
+	}
+	else
+	{
+		matrix_first_partition_size = matrixA.size() / 2;
+
+	}
+}
+
+int main()
+{
+	unsigned int i, j, n;
+	//unsigned int i, j, m, n, o, p;
+	n = 4;
+	//m = n = o = p = 4;
+	//m = 4;
+	//n = 4;
+	//o = 4;
+	//p = 4;
+
+	// all matrices below have the same dimensions as the product of 2 square matrices of the same dimensions results in a square matrix of the same dimensions
+	vector< vector<int> > matrix1(n, vector<int>(n));
+	vector< vector<int> > matrix2(n, vector<int>(n));
+	vector< vector<int> > matrix3(n, vector<int>(n));
+	//vector< vector<int> > matrix1(m, vector<int> (n));
+	//vector< vector<int> > matrix2(o, vector<int> (p));
+	//vector< vector<int> > matrix3(m, vector<int>(p));
+	//i = matrix1.size();
+	//j = matrix1[0].size();
+
+	//matrix1[4][1] = 1;
+
+	cout << "Program to recursively multiply matrices" << endl;
+	
+	ifstream fpInput1("C:/Users/Arijit/Google Drive/DataStrucAndAlgo/Projects/Datasets/Inputs/matrix1.txt");
+	if (fpInput1.is_open())
+	{
+		cout << "Opened input matrix1 file successfully!" << endl;
+		
+		ifstream fpInput2("C:/Users/Arijit/Google Drive/DataStrucAndAlgo/Projects/Datasets/Inputs/matrix2.txt");
+		if (fpInput2.is_open())
+		{
+			for (i = 0; i < 4; ++i)
+			{
+				for (j = 0; j < 4; ++j)
+				{
+					fpInput1 >>	matrix1[i][j] ;
+					fpInput2 >> matrix2[i][j];
+				}
+			}
+			fpInput1.close();
+			fpInput2.close();
+
+			matrix3 = MatrixMultiplication(matrix1, matrix2);
+
+
+
+
+			//ofstream fpOutput;
+			//fpOutput.open("C:/Users/Arijit/Google Drive/DataStrucAndAlgo/Projects/Datasets/Outputs/MergeSortOutput.txt");
+			//copy(random_integers.begin(), random_integers.end(), ostream_iterator<int>(fpOutput, "\n"));
+			//fpOutput.close();
+
+			
+			system("pause");
+			return 0;
+		}
+		else
+		{
+			fpInput1.close();
+			cout << "Unable to open input matrix2 file " << endl;
+			system("pause");
+
+			return 1;
+		}
+	}
+	else
+	{
+
+		cout << "Unable to open input matrix1 file " << endl;
+		system("pause");
+
+		return 1;
+
+	}
+
+
+
+
+
+}
+
