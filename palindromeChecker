@@ -1,0 +1,56 @@
+#include <iostream>
+#include <string>
+#include <vector>
+
+using namespace std;
+
+int checkForPalindrome(const string& palindromeTest)
+{
+	int isPalindrome = 0, j = -1, tempInt;
+	unsigned int i ;
+	char c;
+	vector<char> palindromeTestVect;
+
+	//c = palindromeTest[i];
+	//isPalindrome = int (c);
+
+	for (i = 0; i < palindromeTest.size(); ++i)
+	{
+		tempInt = int (palindromeTest[i]);
+		if ((tempInt >= 65 && tempInt <= 90) || (tempInt >= 97 && tempInt <= 122))
+		{
+			palindromeTestVect.push_back(tolower(palindromeTest[i]));
+		}
+	}
+
+	i = 0; j = palindromeTestVect.size() - 1;
+	
+	while (i < j)
+	{
+		if (palindromeTestVect[i] != palindromeTestVect[j])
+		{
+			isPalindrome = 1;
+			break;
+		}
+		++i; --j;
+	}
+
+	return isPalindrome;
+}
+
+int main()
+{
+	int result;
+	string palindromeTest1;
+	palindromeTest1 = "green Apple";
+	result = checkForPalindrome(palindromeTest1);
+
+	string palindromeTest2("put it up");
+	result = checkForPalindrome(palindromeTest2);
+
+	palindromeTest1 = "Red rum, sir, is murder";
+	result = checkForPalindrome(palindromeTest2);
+
+
+	return 0;
+}
