@@ -1,0 +1,160 @@
+// ConsoleApplication2.cpp : Defines the entry point for the console application.
+// contains all source code
+// I used this code that I mostly obtained online to study certain C++ features
+
+#include <iostream>
+#include <algorithm>
+#include <random>
+//#include <chrono>
+#include <vector>
+#include <fstream>
+#include <cmath>
+#include <iterator>
+
+using namespace std;
+//int i_global = 0;
+
+typedef pair<double, double> point_t;
+typedef pair<point_t, point_t> points_t;
+
+double distanceBetween(const point_t& a, const point_t& b) 
+{
+	return sqrt(pow(b.first - a.first, 2)	+ pow(b.second - a.second, 2));
+}
+
+pair<double, points_t> findClosestBrute(const vector<point_t>& points) 
+{
+	if (points.size() < 2) 
+	{
+		return { -1,{ { 0, 0 },{ 0, 0 } } };
+	}
+	auto minDistance = abs(distanceBetween(points[0], points[1]));
+	points_t minPoints = { points[0], points[1] };
+	for (auto i = begin(points); i != (end(points) - 1); ++i) 
+	{
+		for (auto j = i + 1; j < end(points); ++j) 
+		{
+			auto newDistance = abs(distanceBetween(*i, *j));
+			if (newDistance < minDistance) 
+			{
+				minDistance = newDistance;
+				minPoints.first = *i;
+				minPoints.second = *j;
+			}
+		}
+	}
+	return{ minDistance, minPoints };
+}
+
+
+pair<double, points_t> findClosestOptimized(const vector<point_t>& xP, const vector<point_t>& yP)
+{
+	auto n = xP.size();
+
+	if (n <= 3) return findClosestBrute(xP);
+	
+	auto xL = vector <point_t>();
+	auto xR = vector <point_t>();
+	copy(begin(xP), begin(xP) + n / 2, back_inserter(xL));
+	copy(begin(xP) + n / 2, end(xP), back_inserter(xR));
+
+	//auto xM = xP[n / 2].first;
+	auto xMx = xL.back().first;
+
+	auto yL = vector<point_t>();
+	auto yR = vector<point_t>();
+	copy_if(begin(yP), end(yP), back_inserter(yL), [&xMx](const point_t& p) { return p.first <= xMx; });
+	copy_if(begin(yP), end(yP), back_inserter(yR), [&xMx](const point_t& p) { return p.first > xMx; });
+		
+	auto p1 = findClosestOptimized(xL, yL);
+	auto p2 = findClosestOptimized(xR, yR);
+	auto minPair = (p1.first <= p2.first) ? p1 : p2;
+
+	auto yS = std::vector<point_t>();
+	copy_if(begin(yP), end(yP), back_inserter(yS), [&minPair, &xMx](const point_t& p) { return abs(p.first - xMx) < minPair.first; });
+
+	auto result = minPair;
+	for (auto i = begin(yS); i != (end(yS) - 1); ++i)
+	{
+		for (auto j = i + 1; j != end(yS) && ((j->second - i->second) < minPair.first); ++j)
+		{
+			auto newDistance = abs(distanceBetween(*i, *j));
+			if (newDistance < result.first) result = { newDistance, {*i, *j} };
+		}
+	}
+
+	return result;
+}
+
+
+int main()
+{
+	unsigned int nrows = 100000;
+	//vector< vector<int> > random_integers_x(nrows, vector<int>(2)), random_integers_y(nrows, vector<int>(2));
+	vector<point_t> points(nrows);
+	//default_random_engine re(chrono::system_clock::to_time_t(chrono::system_clock::now()));
+	random_device rd;
+	uniform_real_distribution<double> urd(-50000.0, 50000.0);
+	generate(begin(points), end(points), [&urd, &rd]() {return point_t{ 50000 + urd(rd), 50000 + urd(rd) };	});
+
+	cout << "Program to read in file of random numbers and sort using Quicksort" << endl;
+	ifstream fpInput("C:/Users/Arijit/Google Drive/DataStrucAndAlgo/Projects/Datasets/Inputs/XYCoordinatesArray.txt");
+	//vector<point_t> points{ istream_iterator<int>{fpInput},{ } };
+	if (fpInput.is_open())
+	{
+
+		cout << "Opened input file successfully!" << endl;
+
+		
+		for (auto i = 0; i < nrows; i++)
+		{
+			fpInput >> points[i].first;
+			fpInput >> points[i].second;
+			
+		}
+
+		fpInput.close();
+
+		sort(begin(points), end(points), [](const point_t& a, const point_t& b) { return a.first < b.first; });
+		auto xP = points;
+
+		sort(begin(points), end(points), [](const point_t& a, const point_t& b) { return a.second < b.second; });
+		auto yP = points;
+		
+		//auto answer = findClosestBrute(points);
+		auto answer = findClosestOptimized(xP, yP);
+
+		
+		cout << "sorted array\n";
+		//for (i = 0; i < random_integers.size(); i++)
+		//{
+		//	cout << endl << random_integers[i];
+		//}
+		//cout << endl << endl;
+		//copy(random_integers.begin(), random_integers.end(), ostream_iterator<int>(cout, "\n"));
+
+		ofstream fpOutput;
+		fpOutput.open("C:/Users/Arijit/Google Drive/DataStrucAndAlgo/Projects/Datasets/Outputs/MergeSortOutput.txt");
+		//copy(random_integers.begin(), random_integers.end(), ostream_iterator<int>(fpOutput, "\n"));
+		fpOutput.close();
+
+		system("pause");
+		return 0;
+
+	}
+	else
+	{
+
+		cout << "Unable to open input file " << endl;
+		system("pause");
+
+		return 1;
+
+	}
+
+
+
+
+
+}
+
