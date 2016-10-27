@@ -1,0 +1,54 @@
+#include <vector>
+#include <string>
+#include <iostream>
+#include <tuple>
+#include <algorithm>
+#include <set>
+
+using namespace std;
+
+set<int> knapsackProblem(vector<tuple<string, int, int, vector<int>>>& items)
+{
+	set<int> returnedItems;
+	int i, j, value1;
+
+	for (i = 1; i < items.size(); ++i)
+		for (j = 1; j < (get<3>(items[0])).size(); ++j)
+			if (j >= (get <2>(items[i]))) (get<3>(items[i]))[j] = max((get<3>(items[i - 1]))[j], (get<3>(items[i - 1]))[j - (get <2>(items[i]))] + (get <1>(items[i])));			
+			else (get<3>(items[i]))[j] = (get<3>(items[i - 1]))[j];
+	
+	i = items.size() - 1;
+	value1 = (get<3>(items[i]))[(get<3>(items[0])).size() - 1];
+	
+	for (j = (get<3>(items[0])).size() - 1; j > 0; --j)
+	{
+		while ((get<3>(items[i]))[j] == (get<3>(items[i - 1]))[j]) --i;
+		if ((get<3>(items[i]))[j] > (get<3>(items[i]))[j - 1])
+		{ 
+			value1 = value1 - get<1>(items[i]);
+			returnedItems.insert(i);
+			if (value1 == 0) break;
+			--i;
+		}
+	}
+
+	return returnedItems;
+}
+
+int main()
+{
+	int knapsackMaxWt = 6;
+	vector<tuple<string, int, int, vector<int>>> items;
+	vector<int> sizeVect(knapsackMaxWt + 1);
+
+	items.push_back(make_tuple("", 0, 0, sizeVect));
+	items.push_back(make_tuple("map", 3, 4, sizeVect));
+	items.push_back(make_tuple("compass", 2, 3, sizeVect));
+	items.push_back(make_tuple("water", 4, 2, sizeVect));
+	items.push_back(make_tuple("sandwich", 4, 3, sizeVect));
+
+	auto returnedItems = knapsackProblem(items);
+	
+	return 0;
+}
+
