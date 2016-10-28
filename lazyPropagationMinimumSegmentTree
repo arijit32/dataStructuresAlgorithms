@@ -1,0 +1,132 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <limits> // for numeric_limits
+// studied technique on Tushar Roy's youtube channel
+// https://www.youtube.com/watch?v=xuoQdt5pHj0&index=23&list=PLrmLmBdmIlpv_jNDXtJGYTPNQ2L1gdHxu
+
+using namespace std;
+
+void createSegmentTree(const vector<int>& input, vector<int>& segmentTree, unsigned int start, unsigned int end, unsigned int pos)
+{
+	if (start == end) segmentTree[pos] = input[start];
+	else
+	{
+		int mid = (start + end) / 2;
+		createSegmentTree(input, segmentTree, start, mid, (2 * pos) + 1);
+		createSegmentTree(input, segmentTree, mid + 1, end, (2 * pos) + 2);
+
+		segmentTree[pos] = min(segmentTree[(2 * pos) + 1], segmentTree[(2 * pos) + 2]);
+	}
+}
+
+void lazyPropagationSegmentTree(vector<int>& lazyTree, vector<int>& segmentTree, int delta, unsigned int lazyPropagationStart, unsigned int lazyPropagationEnd, unsigned int start, unsigned int end, unsigned int pos)
+{
+	if (start <= end)
+	{
+		if (lazyTree[pos] != 0)
+		{
+			segmentTree[pos] += lazyTree[pos];
+			// if start = end, then we r at a leaf node
+			if (start != end)
+			{
+				lazyTree[(2 * pos) + 1] += lazyTree[pos];
+				lazyTree[(2 * pos) + 2] += lazyTree[pos];
+			}
+			lazyTree[pos] = 0;
+		}
+
+		if (!((lazyPropagationStart > end) || (lazyPropagationEnd < start)))
+		{
+			// full overlap
+			if ((lazyPropagationStart <= start) && (lazyPropagationEnd >= end))
+			{
+				segmentTree[pos] += delta;
+				if (start != end) 
+				{
+					lazyTree[(2 * pos) + 1] += delta;
+					lazyTree[(2 * pos) + 2] += delta;
+				}
+			}
+			else
+			{
+				int mid = (start + end) / 2;
+				lazyPropagationSegmentTree(lazyTree, segmentTree, delta, lazyPropagationStart, lazyPropagationEnd, start, mid, (2 * pos) + 1);
+				lazyPropagationSegmentTree(lazyTree, segmentTree, delta, lazyPropagationStart, lazyPropagationEnd, mid + 1, end, (2 * pos) + 2);
+
+				segmentTree[pos] = min(segmentTree[(2 * pos) + 1], segmentTree[(2 * pos) + 2]);
+			}
+		}
+	}
+}
+
+int querySegmentTree(const vector<int>& segmentTree, unsigned int qStart, unsigned int qEnd, unsigned int start, unsigned int end, unsigned int pos)
+{
+	if ((qStart <= start) && (qEnd >= end)) return segmentTree[pos];
+	else if ((qStart > end) || (qEnd < start)) return numeric_limits<int>::max();
+	else
+	{
+		int mid = (start + end) / 2;
+
+		return min(querySegmentTree(segmentTree, qStart, qEnd, start, mid, (2 * pos) + 1), querySegmentTree(segmentTree, qStart, qEnd, mid + 1, end, (2 * pos) + 2));
+	}
+}
+
+int lazyQuerySegmentTree(vector<int>& lazyTree, vector<int>& segmentTree, unsigned int lazyPropagationQStart, unsigned int lazyPropagationQEnd, unsigned int start, unsigned int end, unsigned int pos)
+{
+	if (lazyPropagationQStart > lazyPropagationQEnd) return numeric_limits<int>::max();
+
+	if (lazyTree[pos] != 0)
+	{
+		segmentTree[pos] += lazyTree[pos];
+		if (start != end)
+		{
+			lazyTree[(2 * pos) + 1] += lazyTree[pos];
+			lazyTree[(2 * pos) + 2] += lazyTree[pos];
+		}
+		lazyTree[pos] = 0;
+	}
+
+	if ((lazyPropagationQStart > end) || (lazyPropagationQEnd < start)) return numeric_limits<int>::max();
+
+	if ((lazyPropagationQStart <= start) && (lazyPropagationQEnd >= end)) return segmentTree[pos];
+
+	int mid = (start + end) / 2;
+	return min(lazyQuerySegmentTree(lazyTree, segmentTree, lazyPropagationQStart, lazyPropagationQEnd, start, mid, (2 * pos) + 1), lazyQuerySegmentTree(lazyTree, segmentTree, lazyPropagationQStart, lazyPropagationQEnd, mid + 1, end, (2 * pos) + 2));
+}
+
+// bitshifting operations to compute higher power of 2 (found this online)
+unsigned int upper_power_of_two(unsigned int v)
+{
+	v--;
+	v |= v >> 1;
+	v |= v >> 2;
+	v |= v >> 4;
+	v |= v >> 8;
+	v |= v >> 16;
+	v++;
+	return v;
+
+}
+
+int main()
+{		
+	vector<int> inputVect;
+	inputVect.push_back(2);
+	inputVect.push_back(3);
+	inputVect.push_back(-1);
+	inputVect.push_back(4);
+		
+	// code below handles segmentTree array size for all input sizes, not necessarily powers of 2
+	vector<int> segmentTree(( 2 * upper_power_of_two(inputVect.size())) - 1), lazyTree((2 * upper_power_of_two(inputVect.size())) - 1);
+
+	createSegmentTree(inputVect, segmentTree, 0, inputVect.size() - 1, 0);
+	auto result = querySegmentTree(segmentTree, 1, 3, 0, inputVect.size() - 1, 0);
+
+	lazyPropagationSegmentTree(lazyTree, segmentTree, 2, 0, 3, 0, inputVect.size() - 1, 0);
+	lazyPropagationSegmentTree(lazyTree, segmentTree, 4, 2, 2, 0, inputVect.size() - 1, 0);
+
+	result = lazyQuerySegmentTree(lazyTree, segmentTree, 1, 2, 0, inputVect.size() - 1, 0);
+
+	return 0;
+}
